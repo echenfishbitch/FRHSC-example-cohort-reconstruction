@@ -83,10 +83,10 @@ Cohort[[i]]$Age3.11<-Cohort[[i]]$Age3.12/(1-0.0184) #no ocean harvest in Nov
 Cohort[[i]]$Age3.10<-Cohort[[i]]$Age3.11/(1-0.0184)+Cohort[[i]]$Oct2
 Cohort[[i]]$Age3.9<-Cohort[[i]]$Age3.10/(1-0.0184)+Cohort[[i]]$Sept2
 Cohort[[i]]$Age3.8<-Cohort[[i]]$Age3.9/(1-0.0184)+Cohort[[i]]$Aug2
-Cohort[[i]]$Age3.7<-Cohort[[i]]$Age3.8/(1-0.0561)+Cohort[[i]]$Jul2
-Cohort[[i]]$Age3.6<-Cohort[[i]]$Age3.7/(1-0.0561)+Cohort[[i]]$Jun2
+Cohort[[i]]$Age3.7<-Cohort[[i]]$Age3.8/(1-0.0184)+Cohort[[i]]$Jul2
+Cohort[[i]]$Age3.6<-Cohort[[i]]$Age3.7/(1-0.0184)+Cohort[[i]]$Jun2
 #fish turn 3
-Cohort[[i]]$Age3.5<-Cohort[[i]]$Age3.6/(1-0.0561)+Cohort[[i]]$May2+(Cohort[[i]]$Age2Sp+Cohort[[i]]$Age2Hat+Cohort[[i]]$InRiver2)/(1-0.0184)
+Cohort[[i]]$Age3.5<-Cohort[[i]]$Age3.6/(1-0.0561)+Cohort[[i]]$May2+(Cohort[[i]]$Age2Sp+Cohort[[i]]$Age2Hat+Cohort[[i]]$InRiver2)/(1-0.0561)
 #First Year at Sea (monthly)
 Cohort[[i]]$Age2.4<-Cohort[[i]]$Age3.5/(1-0.0561)+Cohort[[i]]$Apr2
 Cohort[[i]]$Age2.3<-Cohort[[i]]$Age2.4/(1-0.0561)
