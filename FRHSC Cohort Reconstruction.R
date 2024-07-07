@@ -29,7 +29,7 @@ Fishing_Impact<-list(Fishing_Impact)
 for(i in 1:length(Cohort)){ #For Monthly
 Cohort[[i]]<-left_join(Cohort[[i]],Fishing_Impact[[i]],by="brood_year")%>%
   select(c("brood_year","Individuals_Released","Age2Sp","Age3Sp","Age4Sp","Age5Sp","Age2Hat","Age3Hat","Age4Hat","Age5Hat","InRiver2","InRiver3", "InRiver4", "InRiver5",
-           "Apr2","May2","Jun2","Jul2","Aug2","Sept2","Oct2","Mar3", "Apr3","May3","Jun3","Jul3","Aug3","Sept3","Oct3","Mar4","Apr4","May4","Jun4", "Jul4","Aug4","Sept4","Oct4","Apr5","May5"))
+           "Apr2","May2","Jun2","Jul2","Aug2","Sept2","Oct2","Mar3", "Apr3","May3","Jun3","Jul3","Aug3","Sept3","Oct3","Mar4","Apr4","May4","Jun4", "Jul4","Aug4","Sept4","Oct4","Apr5","May5", "Jun5", "Jul5"))
 Cohort[[i]][is.na(Cohort[[i]])] <- 0
 
 }
@@ -119,7 +119,7 @@ Cohort[[i]][is.na(Cohort[[i]])]<-0 #data frame
 test<-Cohort[[1]]
 
 is.na(Cohort)<-0 #list
-# write.csv(Cohort, file = "CWT Cohort Reconstruction.csv", row.names = FALSE)
+write.csv(Cohort, file = "CWT Cohort Reconstruction.csv", row.names = FALSE)
 ######
 saveRDS(Cohort, file = "CWT Cohort Reconstruction_Bootstrap.Rds")
 
