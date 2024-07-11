@@ -42,6 +42,7 @@ CWT_Recoveries<-left_join(CWT_Recoveries, BY, by="tag_code")
 CWT_Recoveries<-CWT_Recoveries %>% #adding Month of record and Age
   mutate(Month =month(ymd(CWT_Recoveries$recovery_date))) %>%
   mutate(Age = run_year - brood_year)
+
 #sampling site -> region
 SiteCodes<-read.csv("sitearea.modified.csv")
 SiteCodes<-SiteCodes[,c(1:3)]
@@ -50,7 +51,6 @@ colnames(SiteCodes)[3]<-"Location"
 CWT_Recoveries.Com<-CWT_Recoveries %>%
   filter(fishery==10) %>%
   left_join(SiteCodes)
-
 #Recreation Fisheries
 CWT_Recoveries.Rec<-CWT_Recoveries %>%
   filter(fishery==40)%>%
@@ -64,11 +64,15 @@ Release_mort<-read.csv("release.mort.rate.csv")
 CWT_Recoveries.Com<-left_join(CWT_Recoveries.Com, Release_mort, by = c("run_year", "fishery", "Location", "Month"))
 CWT_Recoveries.Rec<-left_join(CWT_Recoveries.Rec, Release_mort, by = c("run_year", "fishery", "Location", "Month"))
 CWT_Recoveries.Rec$Release.mort.rate[is.na(CWT_Recoveries.Rec$Release.mort.rate)]<-.14 #WA recovery has no rate. Using .14, the standard rate
+
+CWT_Recoveries.Rec<-CWT_Recoveries.Rec %>% #removing NAs for data training
+  filter(!is.na(limit))
+CWT_Recoveries.Com<-CWT_Recoveries.Com %>% #removing NAs for data training
+  filter(!is.na(limit))
 #appending percent harvetable based on Month, Age, and Size Limit
 SizeAge<-read.csv("length.at.age.csv")
 #Function: Present Harvest requires Location (e.g. FB, SF, MO), Month, Brood Year, Run Year, and 
 #produces the percentage of fish in that class that can be taken by the fishery. 
-
 Percent_Harvest<-function(Month, Age, Size_Limit){
     1-pnorm(Size_Limit, mean = SizeAge$mean[which(SizeAge$age == Age+1 & SizeAge$month == Month)], sd = SizeAge$sd[which(SizeAge$age == Age+1 & SizeAge$month == Month)])
 }
@@ -87,7 +91,7 @@ CWT_Recoveries.Com<-CWT_Recoveries.Com %>%
 Commercial_Harvest<-CWT_Recoveries.Com %>%
   group_by(brood_year, run_year, Month) %>%
   summarise(Tags_Collected = n(),Catch =sum (Catch), Harvested=sum(Harvest), Release_Mort=sum(Release_Mort), Drop_Mort=sum(Drop_Mort), Impact=sum(Impact))
-# write.csv(Commercial_Harvest, "Commercial_Harvest_Impact.csv", row.names = FALSE)
+write.csv(Commercial_Harvest, "Commercial_Harvest_Impact.csv", row.names = FALSE)
 
 #Calculating p,C,S for Recreational
 CWT_Recoveries.Rec$Percent_Harvestable<-as.numeric(as.character(mapply(Percent_Harvest, CWT_Recoveries.Rec$Month, CWT_Recoveries.Rec$Age, CWT_Recoveries.Rec$limit)))
@@ -102,7 +106,7 @@ CWT_Recoveries.Rec<-CWT_Recoveries.Rec %>%
 Recreational_Harvest<-CWT_Recoveries.Rec %>%
   group_by(brood_year, run_year, Month) %>%
   summarise(Tags_Collected = n(),Catch =sum (Catch),Harvested=sum(Harvest), Release_Mort=sum(Release_Mort), Drop_Mort=sum(Drop_Mort), Impact=sum(Impact))
-# write.csv(Recreational_Harvest, "Recreational_Harvest_Impact.csv", row.names = FALSE)
+write.csv(Recreational_Harvest, "Recreational_Harvest_Impact.csv", row.names = FALSE)
 
 #Combining recreation and commercial data
 Impact<-full_join(Recreational_Harvest, Commercial_Harvest, by=c("brood_year", "run_year","Month"))
@@ -116,22 +120,22 @@ Impact<- Impact%>%
   group_by(brood_year) %>%
   summarize(Apr2= sum(`2_4`, na.rm = TRUE),May2= sum(`2_5`, na.rm = TRUE),Jun2= sum(`2_6`, na.rm = TRUE),
             Jul2 = sum(`2_7`, na.rm = TRUE), Aug2 = sum(`2_8`, na.rm = TRUE), Sept2 = sum(`2_9`, na.rm = TRUE),
-            Oct2 = sum(`2_10`, na.rm = TRUE), Nov2 = sum(`2_11`, na.rm = TRUE), Dec2 = sum(`2_12`, na.rm = TRUE), 
-            Jan3 = sum(`3_1`, na.rm = TRUE),Feb3 = sum(`3_2`, na.rm = TRUE),Mar3 = sum(`3_3`, na.rm = TRUE), 
+            Oct2 = sum(`2_10`, na.rm = TRUE), Nov2 = sum(`2_11`, na.rm = TRUE), 
+            Mar3 = sum(`3_3`, na.rm = TRUE), 
             Apr3 = sum(`3_4`, na.rm = TRUE), May3 = sum(`3_5`, na.rm = TRUE), Jun3= sum(`3_6`, na.rm = TRUE) , 
             Jul3 = sum(`3_7`, na.rm = TRUE), Aug3 = sum(`3_8`, na.rm = TRUE), Sept3 = sum(`3_9`, na.rm = TRUE), 
             Oct3 = sum(`3_10`, na.rm = TRUE),Nov3 = sum(`3_11`, na.rm = TRUE),Dec3 = sum(`3_12`, na.rm = TRUE),
-            Jan4 = sum(`4_1`, na.rm = TRUE),Feb4 = sum(`4_2`, na.rm = TRUE),  Mar4 = sum(`4_3`, na.rm = TRUE),
+            Feb4 = sum(`4_2`, na.rm = TRUE),  Mar4 = sum(`4_3`, na.rm = TRUE),
             Apr4 = sum(`4_4`, na.rm = TRUE),May4 = sum(`4_5`, na.rm = TRUE),Jun4 = sum(`4_6`, na.rm = TRUE),
             Jul4 = sum(`4_7`, na.rm = TRUE),Aug4 = sum(`4_8`, na.rm = TRUE),Sept4 = sum(`4_9`, na.rm = TRUE),
             Oct4 = sum(`4_10`, na.rm = TRUE), Apr5 = sum(`5_4`, na.rm = TRUE),May5 = sum(`5_5`, na.rm = TRUE),
             Jun5 = sum(`5_6`, na.rm = TRUE),Jul5 = sum(`5_7`, na.rm = TRUE))
 
-# write.csv(Impact, "Fishing_Impact.csv", row.names = FALSE)
+write.csv(Impact, "Fishing_Impact.csv", row.names = FALSE)
 
 
 ###Bootstrapping. 
-niterations = 40
+niterations = 100
 #Recreational
 CWT_Recoveries.Rec$Harvested_Sample<-NA
 CWT_Recoveries.Rec$Catch_Sample<-NA
